@@ -1,0 +1,30 @@
+name: Get in Touch
+description: Send a message, inquiry, or say hello!
+title: "[Contact]: "
+labels: ["contact"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reaching out! Fill in the fields below to leave a message.
+  - type: input
+    id: name
+    attributes:
+      label: Name or Handle
+      placeholder: What should I call you?
+    validations:
+      required: true
+  - type: input
+    id: reply_to
+    attributes:
+      label: Preferred Contact Method (Optional)
+      placeholder: e.g. Email address, Mastodon, X, etc. (leave blank if replying here is fine)
+    validations:
+      required: false
+  - type: textarea
+    id: message
+    attributes:
+      label: Message
+      placeholder: What would you like to discuss?
+    validations:
+      required: true

@@ -1,5 +1,529 @@
 <!DOCTYPE html>
-<html>
-  <head><title>OK</title></head>
-  <body>OK</body>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="ejfn (Eric) — autonomous software engineering, multi-agent workflows, and robust software systems.">
+  <title>ejfn@dev:~$ autonomous-software-engineering</title>
+  
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23080c14'/><path d='M28 32 L50 50 L28 68' stroke='%2300ff66' stroke-width='8' stroke-linecap='round' stroke-linejoin='round' fill='none'/><line x1='58' y1='68' x2='78' y2='68' stroke='%2300ff66' stroke-width='8' stroke-linecap='round'/></svg>">
+
+  <style>
+    :root {
+      --bg: #070a0f;
+      --term-bg: #0b1017;
+      --term-header: #111722;
+      --border: #1e293b;
+      --green: #00ff66;
+      --green-dim: #00c853;
+      --green-glow: rgba(0, 255, 102, 0.14);
+      --cyan: #38bdf8;
+      --yellow: #facc15;
+      --purple: #c084fc;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-subtle: #475569;
+      --font-mono: ui-monospace, "JetBrains Mono", "Fira Code", SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    [data-theme="cyber"] {
+      --bg: #090615;
+      --term-bg: #100b24;
+      --term-header: #1a1238;
+      --border: #2d1f52;
+      --green: #f43f5e;
+      --green-dim: #e11d48;
+      --green-glow: rgba(244, 63, 94, 0.18);
+      --cyan: #38bdf8;
+      --yellow: #facc15;
+      --purple: #e879f9;
+      --text-muted: #a5b4fc;
+      --text-subtle: #6366f1;
+    }
+
+    [data-theme="amber"] {
+      --bg: #0c0903;
+      --term-bg: #140f06;
+      --term-header: #1f1709;
+      --border: #3b2c0f;
+      --green: #ffb000;
+      --green-dim: #d97706;
+      --green-glow: rgba(255, 176, 0, 0.18);
+      --cyan: #ffd066;
+      --yellow: #ffe599;
+      --purple: #f59e0b;
+      --text-muted: #d97706;
+      --text-subtle: #92400e;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 14px;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2.5rem 1rem;
+      background-image: 
+        radial-gradient(ellipse at 50% 0%, var(--green-glow) 0%, transparent 65%),
+        linear-gradient(rgba(255, 255, 255, 0.012) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.012) 1px, transparent 1px);
+      background-size: 100% 100%, 24px 24px, 24px 24px;
+    }
+
+    .terminal {
+      width: 100%;
+      max-width: 680px;
+      background: var(--term-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 
+        0 20px 50px rgba(0, 0, 0, 0.65), 
+        0 0 24px var(--green-glow);
+      backdrop-filter: blur(8px);
+    }
+
+    /* Window Header */
+    .header {
+      background: var(--term-header);
+      border-bottom: 1px solid var(--border);
+      padding: 0.7rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      user-select: none;
+    }
+
+    .dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .dot-red { background: #ff5f56; }
+    .dot-yellow { background: #ffbd2e; }
+    .dot-green { background: #27c93f; }
+
+    .title {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+    }
+
+    .themes {
+      display: flex;
+      gap: 4px;
+    }
+
+    .theme-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      padding: 2px 7px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .theme-btn:hover, .theme-btn.active {
+      color: var(--green);
+      border-color: var(--green);
+      background: var(--green-glow);
+    }
+
+    /* Terminal Body */
+    .body {
+      padding: 1.5rem 1.6rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.4rem;
+    }
+
+    /* ASCII Banner */
+    .ascii-banner {
+      color: var(--green);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      line-height: 1.18;
+      white-space: pre;
+      overflow-x: auto;
+      text-shadow: 0 0 10px var(--green-glow);
+      user-select: none;
+      padding-bottom: 0.2rem;
+    }
+
+    @media (max-width: 480px) {
+      .ascii-banner {
+        font-size: 8px;
+      }
+    }
+
+    .cmd-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .prompt {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .prompt .user { color: var(--green); font-weight: 700; }
+    .prompt .path { color: var(--cyan); }
+    .prompt .char { color: var(--yellow); }
+    .prompt .cmd { color: #ffffff; font-weight: 600; }
+
+    .output {
+      padding-left: 1rem;
+      border-left: 2px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.92rem;
+    }
+
+    .output strong {
+      color: var(--text);
+    }
+
+    .output a {
+      color: var(--green);
+      text-decoration: none;
+    }
+
+    .output a:hover {
+      text-decoration: underline;
+    }
+
+    /* Status badge */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 1px 7px;
+      background: var(--green-glow);
+      border: 1px solid var(--green-dim);
+      border-radius: 4px;
+      color: var(--green);
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .badge-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--green);
+      border-radius: 50%;
+      box-shadow: 0 0 6px var(--green);
+    }
+
+    /* Flat Stack Tags */
+    .tags-cluster {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-top: 0.25rem;
+    }
+
+    .tag {
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.25rem 0.65rem;
+      border-radius: 5px;
+      font-size: 0.82rem;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .tag:hover {
+      border-color: var(--green);
+      color: var(--green);
+      background: var(--green-glow);
+    }
+
+    /* Action Buttons */
+    .cli-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      margin-top: 0.3rem;
+    }
+
+    .cli-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--green);
+      border-radius: 6px;
+      background: transparent;
+      color: var(--green);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      box-shadow: 0 0 10px var(--green-glow);
+    }
+
+    .cli-btn:hover {
+      background: var(--green);
+      color: var(--bg);
+      box-shadow: 0 0 18px var(--green);
+      transform: translateY(-2px);
+    }
+
+    .cli-btn-secondary {
+      border-color: var(--cyan);
+      color: var(--cyan);
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.12);
+    }
+
+    .cli-btn-secondary:hover {
+      background: var(--cyan);
+      color: var(--bg);
+      box-shadow: 0 0 18px var(--cyan);
+    }
+
+    /* Typewriter Cursor */
+    .cursor {
+      display: inline-block;
+      width: 8px;
+      height: 15px;
+      background: var(--green);
+      vertical-align: middle;
+      animation: blink 1s infinite;
+      box-shadow: 0 0 6px var(--green);
+    }
+
+    @keyframes blink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+
+    /* Footer */
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 0.7rem 1.4rem;
+      background: var(--term-header);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .footer a {
+      color: var(--green);
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <main class="terminal">
+    <!-- Window Bar -->
+    <div class="header">
+      <div class="dots">
+        <span class="dot dot-red"></span>
+        <span class="dot dot-yellow"></span>
+        <span class="dot dot-green"></span>
+      </div>
+      <div class="title">ejfn@gh-pages: ~ (bash)</div>
+      <div class="themes">
+        <button class="theme-btn active" onclick="setTheme('matrix')">matrix</button>
+        <button class="theme-btn" onclick="setTheme('cyber')">cyber</button>
+        <button class="theme-btn" onclick="setTheme('amber')">amber</button>
+      </div>
+    </div>
+
+    <!-- Terminal Content Area -->
+    <div class="body">
+      <!-- ASCII Header -->
+      <pre class="ascii-banner">
+ _____   _ _____ _   _ 
+| ____| | |  ___| \ | |
+|  _| _ | | |_  |  \| |
+| |__| || |  _| | |\  |
+|_____|__/|_|   |_| \_|
+[ AUTONOMOUS SOFTWARE ENGINEERING · DEV TERMINAL ]</pre>
+
+      <!-- 1. whoami -->
+      <div class="cmd-group">
+        <div class="prompt">
+          <span class="user">ejfn@dev</span><span class="path">:~</span><span class="char">$</span>
+          <span class="cmd">whoami</span>
+        </div>
+        <div class="output">
+          <div>
+            <strong>Eric</strong> (<a href="https://github.com/ejfn" target="_blank" rel="noopener noreferrer">@ejfn</a>) · Software Engineer &amp; Builder
+          </div>
+          <div style="margin-top: 0.35rem;">
+            <span class="badge">
+              <span class="badge-dot"></span>
+              AUTONOMOUS_SOFTWARE_ENGINEERING
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. focus -->
+      <div class="cmd-group">
+        <div class="prompt">
+          <span class="user">ejfn@dev</span><span class="path">:~</span><span class="char">$</span>
+          <span class="cmd">cat focus.txt</span>
+        </div>
+        <div class="output">
+          Exploring AI-driven autonomous software engineering across the full lifecycle—translating ambiguous intent and requirements into robust software architectures and systems, orchestrating multi-agent execution loops, and enabling continuous self-healing delivery.
+        </div>
+      </div>
+
+      <!-- 3. stack (flat tags) -->
+      <div class="cmd-group">
+        <div class="prompt">
+          <span class="user">ejfn@dev</span><span class="path">:~</span><span class="char">$</span>
+          <span class="cmd">cat stack.txt</span>
+        </div>
+        <div class="output">
+          <div class="tags-cluster">
+            <span class="tag">Multi-Agent Systems</span>
+            <span class="tag">Tool Orchestration</span>
+            <span class="tag">Evals &amp; Benchmarks</span>
+            <span class="tag">Microservices</span>
+            <span class="tag">Event Sourcing</span>
+            <span class="tag">Event Driven</span>
+            <span class="tag">C#</span>
+            <span class="tag">Python</span>
+            <span class="tag">TypeScript</span>
+            <span class="tag">Bash</span>
+            <span class="tag">Linux</span>
+            <span class="tag">Docker</span>
+            <span class="tag">CI/CD</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. contact / connect -->
+      <div class="cmd-group">
+        <div class="prompt">
+          <span class="user">ejfn@dev</span><span class="path">:~</span><span class="char">$</span>
+          <span class="cmd">./connect.sh</span>
+        </div>
+        <div class="output">
+          <div class="cli-actions">
+            <a class="cli-btn" href="https://github.com/ejfn" target="_blank" rel="noopener noreferrer">
+              &gt; GITHUB_PROFILE ↗
+            </a>
+            <a class="cli-btn cli-btn-secondary" href="https://github.com/ejfn/ejfn.github.io/issues/new?template=contact.yml" target="_blank" rel="noopener noreferrer">
+              &gt; GET_IN_TOUCH (ISSUE) ↗
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. active typewriter prompt -->
+      <div class="cmd-group">
+        <div class="prompt">
+          <span class="user">ejfn@dev</span><span class="path">:~</span><span class="char">$</span>
+          <span id="typed-text" style="color: var(--yellow);">autonomous_software_engineering</span><span class="cursor"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Bar / Footer -->
+    <div class="footer">
+      <div>
+        <span>bash 5.2</span> · <span>status: online</span>
+      </div>
+      <div>
+        &copy; <span id="year">2026</span> <a href="https://github.com/ejfn">ejfn</a>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Keep copyright year current
+    const yearEl = document.getElementById('year');
+    if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+    // Theme Switcher Logic
+    function setTheme(theme) {
+      if (theme === 'matrix') {
+        document.documentElement.removeAttribute('data-theme');
+      } else {
+        document.documentElement.setAttribute('data-theme', theme);
+      }
+      localStorage.setItem('term-theme', theme);
+      document.querySelectorAll('.theme-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent === theme);
+      });
+    }
+
+    const savedTheme = localStorage.getItem('term-theme') || 'matrix';
+    setTheme(savedTheme);
+
+    // Interactive typed tagline loop
+    const phrases = [
+      'autonomous_software_engineering',
+      'autonomous_engineering_loops',
+      'multi_agent_orchestration',
+      'full_lifecycle_sdlc',
+      'self_healing_systems'
+    ];
+    let phraseIndex = 0;
+    let charIndex = phrases[0].length;
+    let isDeleting = true;
+    const typedEl = document.getElementById('typed-text');
+
+    function typeLoop() {
+      const current = phrases[phraseIndex];
+      if (isDeleting) {
+        charIndex--;
+        typedEl.textContent = current.substring(0, charIndex);
+        if (charIndex === 0) {
+          isDeleting = false;
+          phraseIndex = (phraseIndex + 1) % phrases.length;
+          setTimeout(typeLoop, 400);
+          return;
+        }
+        setTimeout(typeLoop, 45);
+      } else {
+        charIndex++;
+        typedEl.textContent = current.substring(0, charIndex);
+        if (charIndex === current.length) {
+          isDeleting = true;
+          setTimeout(typeLoop, 2200);
+          return;
+        }
+        setTimeout(typeLoop, 75);
+      }
+    }
+
+    setTimeout(typeLoop, 1600);
+  </script>
+</body>
 </html>
